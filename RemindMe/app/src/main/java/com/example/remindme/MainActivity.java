@@ -22,6 +22,8 @@ public class MainActivity extends AppCompatActivity {
         //Arraylist for location to show user
         ArrayList<LocationItem> locations = new ArrayList<>();
         locations.add(new LocationItem(R.drawable.ic_house,"cool1","cool2"));
+        //Reminder of what it going to look
+        locations.add(new LocationItem(R.drawable.ic_house,"Location","Time(Start time - End time)"));
 
         //Recycler View Setting up 
         rV = findViewById(R.id.recycle);
