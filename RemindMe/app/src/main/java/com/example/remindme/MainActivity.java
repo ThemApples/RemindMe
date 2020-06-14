@@ -71,13 +71,21 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
     public void insertHour()
     {
-        locations.add(new LocationItem(R.drawable.ic_house,"cool1","cool2"));
-        //rVa.notifyItemInserted();
+        int position = 1;
+        locations.add(position, new LocationItem(R.drawable.ic_house,"Location area","Location Time"));
+        rVa.notifyItemInserted(position);
     }
 
     public void insertTransport()
     {
+        int position = 1;
+        locations.add(position, new LocationItem(R.drawable.ic_transport,"Transport Area","Transport Time"));
+        rVa.notifyItemInserted(position);
+    }
 
+    public void removeItem(int position)
+    {
+        locations.remove(position);
     }
 
     @Override
@@ -89,6 +97,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 break;
             case R.id.transport:
                 showMessage("transportButtonPressed");
+                insertTransport();
                 break;
         }
 
