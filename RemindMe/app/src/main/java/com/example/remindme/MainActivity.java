@@ -17,7 +17,7 @@ import java.util.ArrayList;
 public class MainActivity extends AppCompatActivity implements View.OnClickListener {
 
     private RecyclerView rV;
-    private RecyclerView.Adapter rVa;
+    private LocationAdapter rVa;
     private RecyclerView.LayoutManager rvL;
 
     private ArrayList<LocationItem> locations;
@@ -62,6 +62,15 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
         rV.setLayoutManager(rvL);
         rV.setAdapter(rVa);
+
+        rVa.setOnItemClickListener(new LocationAdapter.OnItemClickListener() {
+            @Override
+            public void onItemClick(int position) {
+                locations.get(position);
+                showMessage(position + "pressed!");
+                removeItem(position);
+            }
+        });
     }
 
     public void showMessage(String message)
@@ -86,6 +95,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     public void removeItem(int position)
     {
         locations.remove(position);
+        rVa.notifyItemRemoved(position);
     }
 
     @Override
