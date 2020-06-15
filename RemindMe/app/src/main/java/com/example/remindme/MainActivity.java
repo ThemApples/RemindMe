@@ -13,6 +13,8 @@ import android.widget.Toast;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
 import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Date;
 
 public class MainActivity extends AppCompatActivity implements View.OnClickListener {
 
@@ -26,6 +28,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
     private EditText location;
     private EditText time;
+
+    private String currentDateTimeString;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -73,6 +77,11 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         });
     }
 
+    public void generateTime()
+    {
+        currentDateTimeString = java.text.DateFormat.getDateTimeInstance().format(new Date());
+    }
+
     public void showMessage(String message)
     {
         Toast.makeText(this, message ,Toast.LENGTH_SHORT).show();
@@ -81,14 +90,16 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     public void insertHour()
     {
         int position = 1;
-        locations.add(position, new LocationItem(R.drawable.ic_house,"Location area","Location Time"));
+        generateTime();
+        locations.add(position, new LocationItem(R.drawable.ic_house,"Location area", currentDateTimeString));
         rVa.notifyItemInserted(position);
     }
 
     public void insertTransport()
     {
         int position = 1;
-        locations.add(position, new LocationItem(R.drawable.ic_transport,"Transport Area","Transport Time"));
+        generateTime();
+        locations.add(position, new LocationItem(R.drawable.ic_transport,"Transport Area",currentDateTimeString));
         rVa.notifyItemInserted(position);
     }
 
