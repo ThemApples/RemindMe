@@ -1,20 +1,34 @@
 package com.example.remindme;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.app.ActivityCompat;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import android.Manifest;
+import android.content.pm.PackageManager;
+import android.location.Address;
+import android.location.Geocoder;
+import android.location.Location;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
 
+import com.google.android.gms.location.FusedLocationProviderClient;
+import com.google.android.gms.location.LocationServices;
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.List;
+import java.util.Locale;
 
 public class MainActivity extends AppCompatActivity implements View.OnClickListener {
 
@@ -26,10 +40,10 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     private FloatingActionButton hourButton;
     private FloatingActionButton transportButton;
 
-    private EditText location;
-    private EditText time;
-
+    private String cl;
     private String currentDateTimeString;
+    FusedLocationProviderClient flp;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -47,17 +61,15 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
     }
 
-    public void createLocationList()
-    {
+    public void createLocationList() {
         //Arraylist for location to show user
         locations = new ArrayList<>();
-        locations.add(new LocationItem(R.drawable.ic_house,"cool1","cool2"));
+        locations.add(new LocationItem(R.drawable.ic_house, "cool1", "cool2"));
         //Reminder of what it going to look
-        locations.add(new LocationItem(R.drawable.ic_house,"Location","Time(Start time - End time)"));
+        locations.add(new LocationItem(R.drawable.ic_house, "Location", "Time(Start time - End time)"));
     }
 
-    public void buildRecylerView()
-    {
+    public void buildRecylerView() {
         //Recycler View Setting up
         rV = findViewById(R.id.recycle);
         rV.setHasFixedSize(true);
@@ -77,9 +89,56 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         });
     }
 
-    public void generateTime()
-    {
+    public void generateTime() {
         currentDateTimeString = java.text.DateFormat.getDateTimeInstance().format(new Date());
+    }
+
+    public void locateYou() {
+        flp = LocationServices.getFusedLocationProviderClient(this);
+    }
+
+    public void getLocation() {
+        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            // TODO: Consider calling
+            //    ActivityCompat#requestPermissions
+            // here to request the missing permissions, and then overriding
+            //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
+            //                                          int[] grantResults)
+            // to handle the case where the user grants the permission. See the documentation
+            // for ActivityCompat#requestPermissions for more details.
+            return;
+        }
+        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            // TODO: Consider calling
+            //    ActivityCompat#requestPermissions
+            // here to request the missing permissions, and then overriding
+            //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
+            //                                          int[] grantResults)
+            // to handle the case where the user grants the permission. See the documentation
+            // for ActivityCompat#requestPermissions for more details.
+            return;
+        }
+
+        flp.getLastLocation().addOnCompleteListener(new OnCompleteListener<Location>() {
+            @Override
+            public void onComplete(@NonNull Task<Location> task) {
+                //location time
+                Location lo = task.getResult();
+                if (lo != null) {
+                    try {
+                        //Use geoCoder
+                        Geocoder geo = new Geocoder(MainActivity.this,
+                                Locale.getDefault());
+                        List<Address> address = geo.getFromLocation(
+                                lo.getLatitude(), lo.getLongitude(), 1
+                        );
+                        cl = address.get(0).toString();
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                }
+            }
+        });
     }
 
     public void showMessage(String message)
@@ -91,7 +150,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     {
         int position = 1;
         generateTime();
-        locations.add(position, new LocationItem(R.drawable.ic_house,"Location area", currentDateTimeString));
+        locations.add(position, new LocationItem(R.drawable.ic_house,cl, currentDateTimeString));
         rVa.notifyItemInserted(position);
     }
 
@@ -111,9 +170,20 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
     @Override
     public void onClick(View v) {
+        //Check  permission
+        if(ActivityCompat.checkSelfPermission(MainActivity.this
+                , Manifest.permission.ACCESS_FINE_LOCATION)== PackageManager.PERMISSION_GRANTED){
+            getLocation();
+        }
+        else {
+            ActivityCompat.requestPermissions(MainActivity.this,new String[]{Manifest.permission.ACCESS_FINE_LOCATION},44);
+        }
+
         switch (v.getId()){
             case R.id.hourGlass:
                 showMessage("HourGlassPressed!");
+                locateYou();
+                getLocation();
                 insertHour();
                 break;
             case R.id.transport:
