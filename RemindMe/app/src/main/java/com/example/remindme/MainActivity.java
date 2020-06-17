@@ -12,9 +12,11 @@ import android.location.Address;
 import android.location.Geocoder;
 import android.location.Location;
 import android.os.Bundle;
+import android.os.CountDownTimer;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.google.android.gms.location.FusedLocationProviderClient;
@@ -44,6 +46,10 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     private String currentDateTimeString;
     FusedLocationProviderClient flp;
 
+    private TextView timer;
+    private CountDownTimer cdt;
+    private long timerSeconds = 600000;
+    private boolean triggered = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -55,6 +61,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
         transportButton = findViewById(R.id.transport);
         transportButton.setOnClickListener(this);
+
+        timer = findViewById(R.id.timer);
 
         createLocationList();
         buildRecylerView();
@@ -141,31 +149,71 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         });
     }
 
-    public void showMessage(String message)
-    {
+    public void showMessage(String message){
         Toast.makeText(this, message ,Toast.LENGTH_SHORT).show();
     }
 
-    public void insertHour()
-    {
+    public void insertHour(){
         int position = 1;
         generateTime();
-        locations.add(position, new LocationItem(R.drawable.ic_house,cl, currentDateTimeString));
+        locations.add(position, new LocationItem(R.drawable.ic_house,"Location", currentDateTimeString));
         rVa.notifyItemInserted(position);
     }
 
-    public void insertTransport()
-    {
+    public void insertTransport(){
         int position = 1;
         generateTime();
         locations.add(position, new LocationItem(R.drawable.ic_transport,"Transport Area",currentDateTimeString));
         rVa.notifyItemInserted(position);
     }
 
-    public void removeItem(int position)
-    {
+    public void removeItem(int position){
         locations.remove(position);
         rVa.notifyItemRemoved(position);
+    }
+
+    public void startStop(){
+        if(triggered)
+        {
+            timerStart();
+        }
+        else
+        {
+            timerStop();
+        }
+    }
+
+    public void timerStart(){
+        cdt = new CountDownTimer(timerSeconds, 1000) {
+            @Override
+            public void onTick(long millisUntilFinished) {
+                timerSeconds = millisUntilFinished;
+            }
+
+            @Override
+            public void onFinish() {
+
+            }
+        }.start();
+        triggered = true;
+    }
+
+    public void timerStop(){
+        cdt.cancel();
+        triggered = false;
+    }
+
+    public void updateTimer(){
+        int minutes = (int) timerSeconds/600000;
+        int seconds = (int) timerSeconds%600000;
+        String timeLeft;
+        timeLeft = "" + minutes;
+        timeLeft += ":";
+        if(seconds<10) {
+            timeLeft += "0";
+            timeLeft+= seconds;
+            timer.setText(timeLeft);
+        }
     }
 
     @Override
@@ -182,8 +230,9 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         switch (v.getId()){
             case R.id.hourGlass:
                 showMessage("HourGlassPressed!");
-                locateYou();
-                getLocation();
+                //startStop();
+                //locateYou();
+                //getLocation();
                 insertHour();
                 break;
             case R.id.transport:
