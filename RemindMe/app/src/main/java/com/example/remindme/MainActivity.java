@@ -34,6 +34,7 @@ import java.util.Locale;
 
 public class MainActivity extends AppCompatActivity implements View.OnClickListener {
 
+    private static final long START_TIME_IN_MILLIS = 600000;
     private RecyclerView rV;
     private LocationAdapter rVa;
     private RecyclerView.LayoutManager rvL;
@@ -46,10 +47,11 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     private String currentDateTimeString;
     FusedLocationProviderClient flp;
 
-    private TextView timer;
+    private TextView ticker;
     private CountDownTimer cdt;
-    private long timerSeconds = 600000;
-    private boolean triggered = false;
+    private boolean timerRunning;
+    private long timerLeftInMillis = START_TIME_IN_MILLIS;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -62,11 +64,10 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         transportButton = findViewById(R.id.transport);
         transportButton.setOnClickListener(this);
 
-        timer = findViewById(R.id.timer);
+        ticker = findViewById(R.id.timer);
 
         createLocationList();
         buildRecylerView();
-
     }
 
     public void createLocationList() {
@@ -173,22 +174,13 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         rVa.notifyItemRemoved(position);
     }
 
-    public void startStop(){
-        if(triggered)
-        {
-            timerStart();
-        }
-        else
-        {
-            timerStop();
-        }
-    }
-
-    public void timerStart(){
-        cdt = new CountDownTimer(timerSeconds, 1000) {
+    public void StartTimer()
+    {
+        cdt = new CountDownTimer(timerLeftInMillis,1000) {
             @Override
             public void onTick(long millisUntilFinished) {
-                timerSeconds = millisUntilFinished;
+                timerLeftInMillis = millisUntilFinished;
+                updateCountDownText();
             }
 
             @Override
@@ -196,25 +188,20 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
             }
         }.start();
-        triggered = true;
+        timerRunning = true;
     }
+    public void updateCountDownText(){
+        int minutes = (int) (timerLeftInMillis/1000) / 60;
+        int seconds = (int) (timerLeftInMillis/1000) % 60;
 
-    public void timerStop(){
+        String timeLeftFormatted = String.format(Locale.getDefault(),"%02d:%02d",minutes,seconds);
+
+        ticker.setText(timeLeftFormatted);
+    }
+    public void pauseTimer()
+    {
         cdt.cancel();
-        triggered = false;
-    }
-
-    public void updateTimer(){
-        int minutes = (int) timerSeconds/600000;
-        int seconds = (int) timerSeconds%600000;
-        String timeLeft;
-        timeLeft = "" + minutes;
-        timeLeft += ":";
-        if(seconds<10) {
-            timeLeft += "0";
-            timeLeft+= seconds;
-            timer.setText(timeLeft);
-        }
+        timerRunning = false;
     }
 
     @Override
@@ -231,10 +218,14 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         switch (v.getId()){
             case R.id.hourGlass:
                 showMessage("HourGlassPressed!");
-                //startStop();
                 //locateYou();
                 //getLocation();
-                insertHour();
+                if(timerRunning) {
+                    pauseTimer();
+                }else {
+                    StartTimer();
+                }
+                //insertHour();
                 break;
             case R.id.transport:
                 showMessage("transportButtonPressed");
