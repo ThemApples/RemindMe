@@ -47,6 +47,12 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     private String currentDateTimeString;
     FusedLocationProviderClient flp;
 
+    private String seeTime;
+    private int hour=0;
+    private int minute=0;
+    private int second=0;
+    private String showDifference;
+
     private TextView ticker;
     private CountDownTimer cdt;
     private boolean timerRunning;
@@ -190,18 +196,34 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         }.start();
         timerRunning = true;
     }
+
     public void updateCountDownText(){
         int minutes = (int) (timerLeftInMillis/1000) / 60;
         int seconds = (int) (timerLeftInMillis/1000) % 60;
 
-        String timeLeftFormatted = String.format(Locale.getDefault(),"%02d:%02d",minutes,seconds);
+        //loop to show how long you were in the building for
+        if(seconds >=0){
+            second++;
+            if(second == 60)
+            {
+                second = 0;
+                minute++;
+            }
+        }
 
+        String timeLeftFormatted = String.format(Locale.getDefault(),"%02d:%02d",minutes,seconds);
+        seeTime = timeLeftFormatted;
         ticker.setText(timeLeftFormatted);
     }
     public void pauseTimer()
     {
         cdt.cancel();
         timerRunning = false;
+    }
+
+    public void timeDifference()
+    {
+        showDifference = minute + " Minutes" + second+ "  Seconds";
     }
 
     @Override
@@ -222,14 +244,28 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 //getLocation();
                 if(timerRunning) {
                     pauseTimer();
+                    hourButton.setImageDrawable(getResources().getDrawable(R.drawable.ic_play));
+                    timeDifference();
+                    showMessage(showDifference);
                 }else {
                     StartTimer();
+                    hourButton.setImageDrawable(getResources().getDrawable(R.drawable.ic_pause));
                 }
+                //hourButton.setImageDrawable(getResources().getDrawable(R.drawable.ic_house));
                 //insertHour();
                 break;
             case R.id.transport:
                 showMessage("transportButtonPressed");
-                insertTransport();
+
+                if(timerRunning) {
+                    pauseTimer();
+                    hourButton.setImageDrawable(getResources().getDrawable(R.drawable.ic_play));
+                }else {
+                    StartTimer();
+                    hourButton.setImageDrawable(getResources().getDrawable(R.drawable.ic_pause));
+                }
+
+                //insertTransport();
                 break;
         }
 
