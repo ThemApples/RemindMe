@@ -57,7 +57,7 @@
         android:layout_width="104dp"
         android:layout_height="34dp"
         android:layout_marginStart="44dp"
-        android:text="0:00"
+        android:text="00:00:00"
         android:textSize="25sp"
         android:textAlignment="center"
         app:layout_constraintBottom_toBottomOf="parent"

@@ -34,7 +34,7 @@ import java.util.Locale;
 
 public class MainActivity extends AppCompatActivity implements View.OnClickListener {
 
-    private static final long START_TIME_IN_MILLIS = 600000;
+    private static final long START_TIME_IN_MILLIS = 36000000;
     private RecyclerView rV;
     private LocationAdapter rVa;
     private RecyclerView.LayoutManager rvL;
@@ -45,6 +45,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
     private String cl;
     private String currentDateTimeString;
+    private String startTime;
     FusedLocationProviderClient flp;
 
     private String seeTime;
@@ -107,6 +108,9 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     public void generateTime() {
         currentDateTimeString = java.text.DateFormat.getDateTimeInstance().format(new Date());
     }
+    public void generateStartTime(){
+        startTime = java.text.DateFormat.getDateTimeInstance().format(new Date());
+    }
 
     public void locateYou() {
         flp = LocationServices.getFusedLocationProviderClient(this);
@@ -164,7 +168,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     public void insertHour(){
         int position = 1;
         generateTime();
-        locations.add(position, new LocationItem(R.drawable.ic_house,"Location", currentDateTimeString));
+        locations.add(position, new LocationItem(R.drawable.ic_house,"Location", startTime + " - " + currentDateTimeString + "(" +showDifference+")"));
         rVa.notifyItemInserted(position);
     }
 
@@ -198,7 +202,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     }
 
     public void updateCountDownText(){
-        int minutes = (int) (timerLeftInMillis/1000) / 60;
+        int hours = (int) (timerLeftInMillis/(1000*60*60)) %24;
+        int minutes = (int) (timerLeftInMillis/(1000*60)) % 60;
         int seconds = (int) (timerLeftInMillis/1000) % 60;
 
         //loop to show how long you were in the building for
@@ -208,10 +213,15 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             {
                 second = 0;
                 minute++;
+                if(minute == 60)
+                {
+                    minute = 0;
+                    hour++;
+                }
             }
         }
 
-        String timeLeftFormatted = String.format(Locale.getDefault(),"%02d:%02d",minutes,seconds);
+        String timeLeftFormatted = String.format(Locale.getDefault(),"%02d:%02d:%02d",hours,minutes,seconds);
         seeTime = timeLeftFormatted;
         ticker.setText(timeLeftFormatted);
     }
@@ -223,7 +233,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
     public void timeDifference()
     {
-        showDifference = minute + " Minutes" + second+ "  Seconds";
+        showDifference = hour + " Hours " + minute + " Minutes " + second+ " Seconds";
     }
 
     @Override
@@ -236,7 +246,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         else {
             ActivityCompat.requestPermissions(MainActivity.this,new String[]{Manifest.permission.ACCESS_FINE_LOCATION},44);
         }
-
+        generateStartTime();
         switch (v.getId()){
             case R.id.hourGlass:
                 showMessage("HourGlassPressed!");
@@ -247,6 +257,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                     hourButton.setImageDrawable(getResources().getDrawable(R.drawable.ic_play));
                     timeDifference();
                     showMessage(showDifference);
+                    insertHour();
                 }else {
                     StartTimer();
                     hourButton.setImageDrawable(getResources().getDrawable(R.drawable.ic_pause));
