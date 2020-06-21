@@ -27,6 +27,8 @@ import com.google.android.gms.tasks.Task;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
 import java.io.IOException;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
@@ -45,15 +47,14 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     private FloatingActionButton transportButton;
     private FloatingActionButton stopButton;
 
+    private String buttonCondition;
+
     private String cl;
     private String currentDateTimeString;
     private String startTime;
     FusedLocationProviderClient flp;
 
     private String seeTime;
-    private int hour=0;
-    private int minute=0;
-    private int second=0;
     private String showDifference;
 
     private TextView ticker;
@@ -172,6 +173,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     @SuppressLint("RestrictedApi")
     public void resetTimer()
     {
+        cdt.cancel();
         timerLeftInMillis = START_TIME_IN_MILLIS;
         updateCountDownText();
         stopButton.setVisibility(View.INVISIBLE);
@@ -217,21 +219,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         int minutes = (int) (timerLeftInMillis/(1000*60)) % 60;
         int seconds = (int) (timerLeftInMillis/1000) % 60;
 
-        //loop to show how long you were in the building for
-        if(seconds >=0){
-            second++;
-            if(second == 60)
-            {
-                second = 0;
-                minute++;
-                if(minute == 60)
-                {
-                    minute = 0;
-                    hour++;
-                }
-            }
-        }
-
         String timeLeftFormatted = String.format(Locale.getDefault(),"%02d:%02d:%02d",hours,minutes,seconds);
         seeTime = timeLeftFormatted;
         ticker.setText(timeLeftFormatted);
@@ -242,9 +229,55 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         timerRunning = false;
     }
 
-    public void timeDifference()
+    public void calculate() {
+        String start = startTime.substring(startTime.length() - 10);
+        String end =  currentDateTimeString.substring(currentDateTimeString.length() - 10);
+
+        SimpleDateFormat format = new SimpleDateFormat("HH:mm:ss");
+        Date t1 = null;
+        Date t2 = null;
+        
+        try {
+            t1 = format.parse(start);
+            t2 = format.parse(end);
+        } catch (ParseException e) {
+            e.printStackTrace();
+        }
+
+        long diff = t2.getTime() - t1.getTime();
+        int hours = (int) (diff/(1000*60*60)) %24;
+        int minutes = (int) (diff/(1000*60)) % 60;
+        int seconds = (int) (diff/1000) % 60;
+        showDifference = hours+" Hours "+minutes+" Minutes " +seconds+ " Seconds " ;
+    }
+
+    @SuppressLint("RestrictedApi")
+    public void whileRunning()
     {
-        showDifference = hour + " Hours " + minute + " Minutes " + second+ " Seconds";
+        stopButton.setVisibility(View.VISIBLE);
+        hourButton.setVisibility(View.INVISIBLE);
+        transportButton.setVisibility(View.INVISIBLE);
+    }
+
+    @SuppressLint("RestrictedApi")
+    public void stopRunning()
+    {
+        generateTime();
+        resetTimer();
+        hourButton.setVisibility(View.VISIBLE);
+        transportButton.setVisibility(View.VISIBLE);
+    }
+
+    public void setCondition(int number)
+    {
+        if(number == 1)
+        {
+            buttonCondition = "hour";
+        }
+        else if(number == 2)
+        {
+            buttonCondition = "transport";
+        }
     }
 
     @SuppressLint("RestrictedApi")
@@ -261,18 +294,19 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         switch (v.getId()){
             case R.id.hourGlass:
                 showMessage("HourGlassPressed!");
-                stopButton.setVisibility(View.VISIBLE);
+                whileRunning();
                 generateStartTime();
+                setCondition(1);
+                StartTimer();
                 //locateYou();
                 //getLocation();
                 if(timerRunning) {
-                    pauseTimer();
-                    hourButton.setImageDrawable(getResources().getDrawable(R.drawable.ic_play));
-                    timeDifference();
-                    showMessage(showDifference);
-                    insertHour();
+                    //Used for testing
+                    //pauseTimer();
+                    //hourButton.setImageDrawable(getResources().getDrawable(R.drawable.ic_play));
+                    //showMessage(showDifference);
+                    //insertHour();
                 }else {
-                    StartTimer();
                     hourButton.setImageDrawable(getResources().getDrawable(R.drawable.ic_pause));
                 }
                 //hourButton.setImageDrawable(getResources().getDrawable(R.drawable.ic_house));
@@ -280,6 +314,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 break;
             case R.id.transport:
                 showMessage("transportButtonPressed");
+                setCondition(2);
                 stopButton.setVisibility(View.VISIBLE);
                 if(timerRunning) {
                     pauseTimer();
@@ -291,7 +326,16 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 //insertTransport();
                 break;
             case R.id.stop_button:
-                resetTimer();
+                if(buttonCondition.equals("hour"))
+                {
+                    stopRunning();
+                    calculate();
+                    insertHour();
+                }
+                else if(buttonCondition.equals("transport"))
+                {
+                    insertTransport();
+                }
                 break;
         }
 
