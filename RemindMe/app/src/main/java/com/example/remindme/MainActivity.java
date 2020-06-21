@@ -7,6 +7,7 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import android.Manifest;
+import android.annotation.SuppressLint;
 import android.content.pm.PackageManager;
 import android.location.Address;
 import android.location.Geocoder;
@@ -42,6 +43,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     private ArrayList<LocationItem> locations;
     private FloatingActionButton hourButton;
     private FloatingActionButton transportButton;
+    private FloatingActionButton stopButton;
 
     private String cl;
     private String currentDateTimeString;
@@ -59,7 +61,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     private boolean timerRunning;
     private long timerLeftInMillis = START_TIME_IN_MILLIS;
 
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -67,6 +68,9 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
         hourButton = findViewById(R.id.hourGlass);
         hourButton.setOnClickListener(this);
+
+        stopButton = findViewById(R.id.stop_button);
+        stopButton.setOnClickListener(this);
 
         transportButton = findViewById(R.id.transport);
         transportButton.setOnClickListener(this);
@@ -165,6 +169,13 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         Toast.makeText(this, message ,Toast.LENGTH_SHORT).show();
     }
 
+    @SuppressLint("RestrictedApi")
+    public void resetTimer()
+    {
+        timerLeftInMillis = START_TIME_IN_MILLIS;
+        updateCountDownText();
+        stopButton.setVisibility(View.INVISIBLE);
+    }
     public void insertHour(){
         int position = 1;
         generateTime();
@@ -236,6 +247,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         showDifference = hour + " Hours " + minute + " Minutes " + second+ " Seconds";
     }
 
+    @SuppressLint("RestrictedApi")
     @Override
     public void onClick(View v) {
         //Check  permission
@@ -246,10 +258,11 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         else {
             ActivityCompat.requestPermissions(MainActivity.this,new String[]{Manifest.permission.ACCESS_FINE_LOCATION},44);
         }
-        generateStartTime();
         switch (v.getId()){
             case R.id.hourGlass:
                 showMessage("HourGlassPressed!");
+                stopButton.setVisibility(View.VISIBLE);
+                generateStartTime();
                 //locateYou();
                 //getLocation();
                 if(timerRunning) {
@@ -267,7 +280,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 break;
             case R.id.transport:
                 showMessage("transportButtonPressed");
-
+                stopButton.setVisibility(View.VISIBLE);
                 if(timerRunning) {
                     pauseTimer();
                     hourButton.setImageDrawable(getResources().getDrawable(R.drawable.ic_play));
@@ -275,8 +288,10 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                     StartTimer();
                     hourButton.setImageDrawable(getResources().getDrawable(R.drawable.ic_pause));
                 }
-
                 //insertTransport();
+                break;
+            case R.id.stop_button:
+                resetTimer();
                 break;
         }
 
