@@ -57,6 +57,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     OvershootInterpolator interpolator = new OvershootInterpolator();
 
     private String buttonCondition;
+    private boolean stopButtonOn;
 
     private String cl;
     private String currentDateTimeString;
@@ -245,6 +246,30 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         rVa.notifyItemInserted(position);
     }
 
+    public void insertStudy()
+    {
+        int position = 1;
+        generateTime();
+        locations.add(position, new LocationItem(R.drawable.ic_study,"Studying",startTime + " - " + currentDateTimeString + "(" +showDifference+")"));
+        rVa.notifyItemInserted(position);
+    }
+
+    public void insertShopping()
+    {
+        int position = 1;
+        generateTime();
+        locations.add(position, new LocationItem(R.drawable.ic_shopping_cart,"Shopping",startTime + " - " + currentDateTimeString + "(" +showDifference+")"));
+        rVa.notifyItemInserted(position);
+    }
+
+    public void insertSocial()
+    {
+        int position = 1;
+        generateTime();
+        locations.add(position, new LocationItem(R.drawable.ic_people,"SocialEvent",startTime + " - " + currentDateTimeString + "(" +showDifference+")"));
+        rVa.notifyItemInserted(position);
+    }
+
     public void removeItem(int position){
         locations.remove(position);
         rVa.notifyItemRemoved(position);
@@ -307,9 +332,16 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     @SuppressLint("RestrictedApi")
     public void whileRunning()
     {
+        stopButtonOn = true;
         stopButton.setVisibility(View.VISIBLE);
-        hourButton.setVisibility(View.INVISIBLE);
-        transportButton.setVisibility(View.INVISIBLE);
+        //hourButton.setVisibility(View.INVISIBLE);
+
+        plusButton.setEnabled(!stopButtonOn);
+        hourButton.setEnabled(!stopButtonOn);
+        transportButton.setEnabled(!stopButtonOn);
+        studyButton.setEnabled(!stopButtonOn);
+        socialButton.setEnabled(!stopButtonOn);
+        shoppingButton.setEnabled(!stopButtonOn);
     }
 
     @SuppressLint("RestrictedApi")
@@ -317,19 +349,36 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     {
         generateTime();
         resetTimer();
-        hourButton.setVisibility(View.VISIBLE);
-        transportButton.setVisibility(View.VISIBLE);
+        stopButtonOn = false;
+
+        plusButton.setEnabled(!stopButtonOn);
+        hourButton.setEnabled(!stopButtonOn);
+        transportButton.setEnabled(!stopButtonOn);
+        studyButton.setEnabled(!stopButtonOn);
+        socialButton.setEnabled(!stopButtonOn);
+        shoppingButton.setEnabled(!stopButtonOn);
     }
 
     public void setCondition(int number)
     {
-        if(number == 1)
-        {
+        if(number == 1){
             buttonCondition = "hour";
         }
         else if(number == 2)
         {
             buttonCondition = "transport";
+        }
+        else if(number == 3)
+        {
+            buttonCondition = "Shopping";
+        }
+        else if(number == 4)
+        {
+            buttonCondition = "Study";
+        }
+        else if(number == 5)
+        {
+            buttonCondition = "People";
         }
     }
 
@@ -361,32 +410,30 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 StartTimer();
                 //locateYou();
                 //getLocation();
-                if(timerRunning) {
-                    //Used for testing
-                    //pauseTimer();
-                    //hourButton.setImageDrawable(getResources().getDrawable(R.drawable.ic_play));
-                    //showMessage(showDifference);
-                    //insertHour();
-                }else {
-                    hourButton.setImageDrawable(getResources().getDrawable(R.drawable.ic_pause));
-                }
-                //hourButton.setImageDrawable(getResources().getDrawable(R.drawable.ic_house));
-                //insertHour();
                 break;
             case R.id.transport:
-                showMessage("transportButtonPressed");
                 whileRunning();
                 generateStartTime();
                 setCondition(2);
                 StartTimer();
-                stopButton.setVisibility(View.VISIBLE);
-                if(timerRunning) {
-
-                }else {
-
-                    hourButton.setImageDrawable(getResources().getDrawable(R.drawable.ic_pause));
-                }
-                //insertTransport();
+                break;
+            case R.id.shopping:
+                whileRunning();
+                generateStartTime();
+                setCondition(3);
+                StartTimer();
+                break;
+            case R.id.studying:
+                whileRunning();
+                generateStartTime();
+                setCondition(4);
+                StartTimer();
+                break;
+            case R.id.social:
+                whileRunning();
+                generateStartTime();
+                setCondition(5);
+                StartTimer();
                 break;
             case R.id.stop_button:
                 if(buttonCondition.equals("hour"))
@@ -400,6 +447,24 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                     stopRunning();
                     calculate();
                     insertTransport();
+                }
+                else if(buttonCondition.equals("Shopping"))
+                {
+                    stopRunning();
+                    calculate();
+                    insertShopping();
+                }
+                else if(buttonCondition.equals("Study"))
+                {
+                    stopRunning();
+                    calculate();
+                    insertStudy();
+                }
+                else if(buttonCondition.equals("People"))
+                {
+                    stopRunning();
+                    calculate();
+                    insertSocial();
                 }
                 break;
         }
