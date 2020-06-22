@@ -15,6 +15,7 @@ import android.location.Location;
 import android.os.Bundle;
 import android.os.CountDownTimer;
 import android.view.View;
+import android.view.animation.OvershootInterpolator;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
@@ -46,6 +47,14 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     private FloatingActionButton hourButton;
     private FloatingActionButton transportButton;
     private FloatingActionButton stopButton;
+    private FloatingActionButton plusButton;
+    private FloatingActionButton socialButton;
+    private FloatingActionButton shoppingButton;
+    private FloatingActionButton studyButton;
+
+    float transitionY = 100f;
+    boolean ifMenu = false;
+    OvershootInterpolator interpolator = new OvershootInterpolator();
 
     private String buttonCondition;
 
@@ -67,14 +76,29 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        plusButton = findViewById(R.id.plus);
+        socialButton = findViewById(R.id.social);
+        shoppingButton = findViewById(R.id.shopping);
+        studyButton = findViewById(R.id.studying);
         hourButton = findViewById(R.id.hourGlass);
-        hourButton.setOnClickListener(this);
-
         stopButton = findViewById(R.id.stop_button);
-        stopButton.setOnClickListener(this);
-
         transportButton = findViewById(R.id.transport);
+
+        plusButton.setOnClickListener(this);
+        socialButton.setOnClickListener(this);
+        shoppingButton.setOnClickListener(this);
+        studyButton.setOnClickListener(this);
+        hourButton.setOnClickListener(this);
+        stopButton.setOnClickListener(this);
         transportButton.setOnClickListener(this);
+
+        socialButton.setAlpha(0f);
+        shoppingButton.setAlpha(0f);
+        studyButton.setAlpha(0f);
+        hourButton.setAlpha(0f);
+        stopButton.setAlpha(0f);
+        transportButton.setAlpha(0f);
+
 
         ticker = findViewById(R.id.timer);
 
@@ -82,10 +106,39 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         buildRecylerView();
     }
 
+    private void openMenu()
+    {
+        ifMenu = true;
+
+        plusButton.animate().setInterpolator(interpolator).rotation(45f).setDuration(300).start();
+
+        socialButton.animate().translationY(0f).alpha(1f).setInterpolator(interpolator).setDuration(300).start();
+        shoppingButton.animate().translationY(0f).alpha(1f).setInterpolator(interpolator).setDuration(300).start();
+        studyButton.animate().translationY(0f).alpha(1f).setInterpolator(interpolator).setDuration(300).start();
+        hourButton.animate().translationY(0f).alpha(1f).setInterpolator(interpolator).setDuration(300).start();
+        stopButton.animate().translationY(0f).alpha(1f).setInterpolator(interpolator).setDuration(300).start();
+        transportButton.animate().translationY(0f).alpha(1f).setInterpolator(interpolator).setDuration(300).start();
+
+    }
+
+    private void closeMenu()
+    {
+        ifMenu = false;
+
+        plusButton.animate().setInterpolator(interpolator).rotation(0f).setDuration(300).start();
+
+        socialButton.animate().translationY(transitionY).alpha(0f).setInterpolator(interpolator).setDuration(300).start();
+        shoppingButton.animate().translationY(transitionY).alpha(0f).setInterpolator(interpolator).setDuration(300).start();
+        studyButton.animate().translationY(transitionY).alpha(0f).setInterpolator(interpolator).setDuration(300).start();
+        hourButton.animate().translationY(transitionY).alpha(0f).setInterpolator(interpolator).setDuration(300).start();
+        stopButton.animate().translationY(transitionY).alpha(0f).setInterpolator(interpolator).setDuration(300).start();
+        transportButton.animate().translationY(transitionY).alpha(0f).setInterpolator(interpolator).setDuration(300).start();
+    }
+
+
     public void createLocationList() {
         //Arraylist for location to show user
         locations = new ArrayList<>();
-        locations.add(new LocationItem(R.drawable.ic_house, "cool1", "cool2"));
         //Reminder of what it going to look
         locations.add(new LocationItem(R.drawable.ic_house, "Location", "Time(Start time - End time)"));
     }
@@ -188,7 +241,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     public void insertTransport(){
         int position = 1;
         generateTime();
-        locations.add(position, new LocationItem(R.drawable.ic_transport,"Transport Area",currentDateTimeString));
+        locations.add(position, new LocationItem(R.drawable.ic_transport,"Transport Area",startTime + " - " + currentDateTimeString + "(" +showDifference+")"));
         rVa.notifyItemInserted(position);
     }
 
@@ -236,7 +289,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         SimpleDateFormat format = new SimpleDateFormat("HH:mm:ss");
         Date t1 = null;
         Date t2 = null;
-        
+
         try {
             t1 = format.parse(start);
             t2 = format.parse(end);
@@ -292,6 +345,14 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             ActivityCompat.requestPermissions(MainActivity.this,new String[]{Manifest.permission.ACCESS_FINE_LOCATION},44);
         }
         switch (v.getId()){
+            case R.id.plus:
+                if(ifMenu){
+                    closeMenu();
+                }
+                else {
+                    openMenu();
+                }
+                break;
             case R.id.hourGlass:
                 showMessage("HourGlassPressed!");
                 whileRunning();
@@ -314,13 +375,15 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 break;
             case R.id.transport:
                 showMessage("transportButtonPressed");
+                whileRunning();
+                generateStartTime();
                 setCondition(2);
+                StartTimer();
                 stopButton.setVisibility(View.VISIBLE);
                 if(timerRunning) {
-                    pauseTimer();
-                    hourButton.setImageDrawable(getResources().getDrawable(R.drawable.ic_play));
+
                 }else {
-                    StartTimer();
+
                     hourButton.setImageDrawable(getResources().getDrawable(R.drawable.ic_pause));
                 }
                 //insertTransport();
@@ -334,6 +397,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 }
                 else if(buttonCondition.equals("transport"))
                 {
+                    stopRunning();
+                    calculate();
                     insertTransport();
                 }
                 break;
