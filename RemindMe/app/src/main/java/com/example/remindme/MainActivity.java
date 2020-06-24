@@ -1,6 +1,7 @@
 package com.example.remindme;
 
 import androidx.annotation.NonNull;
+import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 import androidx.recyclerview.widget.LinearLayoutManager;
@@ -14,10 +15,11 @@ import android.location.Geocoder;
 import android.location.Location;
 import android.os.Bundle;
 import android.os.CountDownTimer;
+import android.os.Environment;
+import android.util.Log;
 import android.view.View;
 import android.view.animation.OvershootInterpolator;
 import android.widget.Button;
-import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -27,11 +29,13 @@ import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
@@ -63,6 +67,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     private String currentDateTimeString;
     private String startTime;
     FusedLocationProviderClient flp;
+
+    private boolean tf = false;
 
     private String seeTime;
     private String showDifference;
@@ -144,7 +150,33 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         locations.add(new LocationItem(R.drawable.ic_house, "Location", "Time(Start time - End time)"));
     }
 
+    public void trueBoolean()
+    {
+        tf = true;
+    }
+
+    public void popUp()
+    {
+        final AlertDialog dialog = new AlertDialog.Builder(this)
+                .setTitle("Title")
+                .setMessage("Content")
+                .setPositiveButton("Ok",null)
+                .setNegativeButton("Cancel",null)
+                .show();
+
+        Button pos = dialog.getButton(AlertDialog.BUTTON_POSITIVE);
+        pos.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                showMessage("Clicked pop up");
+                trueBoolean();
+                dialog.dismiss();
+            }
+        });
+    }
+
     public void buildRecylerView() {
+        final boolean[] temp = new boolean[1];
         //Recycler View Setting up
         rV = findViewById(R.id.recycle);
         rV.setHasFixedSize(true);
@@ -156,10 +188,29 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
         rVa.setOnItemClickListener(new LocationAdapter.OnItemClickListener() {
             @Override
-            public void onItemClick(int position) {
+            public void onItemClick(final int position) {
                 locations.get(position);
                 showMessage(position + "pressed!");
-                removeItem(position);
+
+                final AlertDialog dialog = new AlertDialog.Builder(MainActivity.this)
+                        .setTitle("Title")
+                        .setMessage("Content")
+                        .setPositiveButton("Ok",null)
+                        .setNegativeButton("Cancel",null)
+                        .show();
+
+                Button pos = dialog.getButton(AlertDialog.BUTTON_POSITIVE);
+                pos.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        showMessage("Clicked pop up");
+                        removeItem(position);
+                        dialog.dismiss();
+                    }
+                });
+
+
+                //removeItem(position);
             }
         });
     }
@@ -382,6 +433,43 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         }
     }
 
+    public void filer()
+    {
+        String fileName = "ok.txt";
+        String context = "Hello this is this content of the text file.";
+        File file = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS),fileName);
+
+        if(getPermission()) {
+
+
+            try {
+                file.createNewFile();
+                FileOutputStream fos = new FileOutputStream(file);
+                fos.write(context.getBytes());
+                fos.close();
+                showMessage("Saved");
+            } catch (FileNotFoundException e) {
+                e.printStackTrace();
+                showMessage("File Not Found");
+            } catch (IOException e) {
+                e.printStackTrace();
+                showMessage("Error Saving");
+            }
+        }
+
+    }
+
+    public boolean getPermission()
+    {
+        if(Environment.MEDIA_MOUNTED.equals(Environment.getExternalStorageState())) {
+            Log.i("State","Yes it is writeable");
+            return true;
+        }
+        else {
+            return false;
+        }
+    }
+
     @SuppressLint("RestrictedApi")
     @Override
     public void onClick(View v) {
@@ -396,6 +484,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         switch (v.getId()){
             case R.id.plus:
                 if(ifMenu){
+                    filer();
                     closeMenu();
                 }
                 else {
