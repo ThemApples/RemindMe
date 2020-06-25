@@ -169,13 +169,17 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         rVa.setOnItemClickListener(new LocationAdapter.OnItemClickListener() {
             @Override
             public void onItemClick(final int position) {
+                String sT= locations.get(position).getTextBottom().substring(0,23);
+                String eT =locations.get(position).getTextBottom().substring(26,49);
+                String dT = locations.get(position).getTextBottom().substring(50,78);
+
                 locations.get(position);
                 showMessage(position + "pressed!");
 
                 final AlertDialog dialog = new AlertDialog.Builder(MainActivity.this)
                         .setTitle("Are you sure you want to delete this entry?")
-                        .setMessage("Location: \n"+ "Start Time: " + startTime
-                                + "\nEnd Time: " + currentDateTimeString+ "\nDuration: " + showDifference)
+                        .setMessage("Location: \n"+ "Start Time: "+sT+"\nEnd position: " + eT
+                                    + "\nDuration: " + dT )
                         .setPositiveButton("Ok",null)
                         .setNegativeButton("Cancel",null)
                         .show();
