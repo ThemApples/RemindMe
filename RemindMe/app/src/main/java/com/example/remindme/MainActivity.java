@@ -150,31 +150,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         locations.add(new LocationItem(R.drawable.ic_house, "Location", "Time(Start time - End time)"));
     }
 
-    public void trueBoolean()
-    {
-        tf = true;
-    }
-
-    public void popUp()
-    {
-        final AlertDialog dialog = new AlertDialog.Builder(this)
-                .setTitle("Title")
-                .setMessage("Content")
-                .setPositiveButton("Ok",null)
-                .setNegativeButton("Cancel",null)
-                .show();
-
-        Button pos = dialog.getButton(AlertDialog.BUTTON_POSITIVE);
-        pos.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                showMessage("Clicked pop up");
-                trueBoolean();
-                dialog.dismiss();
-            }
-        });
-    }
-
     public void buildRecylerView() {
         final boolean[] temp = new boolean[1];
         //Recycler View Setting up
@@ -193,8 +168,9 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 showMessage(position + "pressed!");
 
                 final AlertDialog dialog = new AlertDialog.Builder(MainActivity.this)
-                        .setTitle("Title")
-                        .setMessage("Content")
+                        .setTitle("Are you sure you want to delete this entry?")
+                        .setMessage("Location: \n"+ "Start Time: " + startTime
+                                + "\nEnd Time: " + currentDateTimeString+ "\nDuration: " + showDifference)
                         .setPositiveButton("Ok",null)
                         .setNegativeButton("Cancel",null)
                         .show();
@@ -208,9 +184,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                         dialog.dismiss();
                     }
                 });
-
-
-                //removeItem(position);
             }
         });
     }
@@ -433,43 +406,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         }
     }
 
-    public void filer()
-    {
-        String fileName = "ok.txt";
-        String context = "Hello this is this content of the text file.";
-        File file = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS),fileName);
-
-        if(getPermission()) {
-
-
-            try {
-                file.createNewFile();
-                FileOutputStream fos = new FileOutputStream(file);
-                fos.write(context.getBytes());
-                fos.close();
-                showMessage("Saved");
-            } catch (FileNotFoundException e) {
-                e.printStackTrace();
-                showMessage("File Not Found");
-            } catch (IOException e) {
-                e.printStackTrace();
-                showMessage("Error Saving");
-            }
-        }
-
-    }
-
-    public boolean getPermission()
-    {
-        if(Environment.MEDIA_MOUNTED.equals(Environment.getExternalStorageState())) {
-            Log.i("State","Yes it is writeable");
-            return true;
-        }
-        else {
-            return false;
-        }
-    }
-
     @SuppressLint("RestrictedApi")
     @Override
     public void onClick(View v) {
@@ -484,7 +420,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         switch (v.getId()){
             case R.id.plus:
                 if(ifMenu){
-                    filer();
                     closeMenu();
                 }
                 else {
