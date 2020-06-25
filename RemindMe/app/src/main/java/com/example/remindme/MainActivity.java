@@ -87,7 +87,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        //lData();
+        //locations = new ArrayList<>();
+        lData();
 
         plusButton = findViewById(R.id.plus);
         socialButton = findViewById(R.id.social);
@@ -112,10 +113,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         stopButton.setAlpha(0f);
         transportButton.setAlpha(0f);
 
-
         ticker = findViewById(R.id.timer);
 
-        createLocationList();
         buildRecylerView();
     }
 
@@ -403,7 +402,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         SharedPreferences sP = getSharedPreferences("shared preferences", MODE_PRIVATE);
         Gson gson = new Gson();
         String json = sP.getString("List", null);
-        Type ty = new TypeToken<ArrayList<ArrayList>>() {}.getType();
+        Type ty = new TypeToken<ArrayList<LocationItem>>() {}.getType();
         locations = gson.fromJson(json, ty);
 
         if(locations == null)
@@ -450,7 +449,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             case R.id.plus:
                 if(ifMenu){
                     closeMenu();
-                    sData();
                 }
                 else {
                     openMenu();
@@ -495,30 +493,35 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                     stopRunning();
                     calculate();
                     insertHour();
+                    sData();
                 }
                 else if(buttonCondition.equals("transport"))
                 {
                     stopRunning();
                     calculate();
                     insertTransport();
+                    sData();
                 }
                 else if(buttonCondition.equals("Shopping"))
                 {
                     stopRunning();
                     calculate();
                     insertShopping();
+                    sData();
                 }
                 else if(buttonCondition.equals("Study"))
                 {
                     stopRunning();
                     calculate();
                     insertStudy();
+                    sData();
                 }
                 else if(buttonCondition.equals("People"))
                 {
                     stopRunning();
                     calculate();
                     insertSocial();
+                    sData();
                 }
                 break;
         }
