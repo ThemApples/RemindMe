@@ -9,6 +9,7 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import android.Manifest;
 import android.annotation.SuppressLint;
+import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.location.Address;
 import android.location.Geocoder;
@@ -28,11 +29,14 @@ import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
+import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
 
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.lang.reflect.Type;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -82,6 +86,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        //lData();
 
         plusButton = findViewById(R.id.plus);
         socialButton = findViewById(R.id.social);
@@ -358,7 +364,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     {
         stopButtonOn = true;
         stopButton.setVisibility(View.VISIBLE);
-        //hourButton.setVisibility(View.INVISIBLE);
 
         plusButton.setEnabled(!stopButtonOn);
         hourButton.setEnabled(!stopButtonOn);
@@ -381,6 +386,30 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         studyButton.setEnabled(!stopButtonOn);
         socialButton.setEnabled(!stopButtonOn);
         shoppingButton.setEnabled(!stopButtonOn);
+    }
+
+    public void sData()
+    {
+        SharedPreferences sP = getSharedPreferences("shared preferences", MODE_PRIVATE);
+        SharedPreferences.Editor ed = sP.edit();
+        Gson gson = new Gson();
+        String json = gson.toJson(locations);
+        ed.putString("List", json);
+        ed.apply();
+    }
+
+    public void lData()
+    {
+        SharedPreferences sP = getSharedPreferences("shared preferences", MODE_PRIVATE);
+        Gson gson = new Gson();
+        String json = sP.getString("List", null);
+        Type ty = new TypeToken<ArrayList<ArrayList>>() {}.getType();
+        locations = gson.fromJson(json, ty);
+
+        if(locations == null)
+        {
+            locations = new ArrayList<>();
+        }
     }
 
     public void setCondition(int number)
@@ -421,6 +450,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             case R.id.plus:
                 if(ifMenu){
                     closeMenu();
+                    sData();
                 }
                 else {
                     openMenu();
