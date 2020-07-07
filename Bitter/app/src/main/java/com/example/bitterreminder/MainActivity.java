@@ -93,7 +93,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
         locations = new ArrayList<>();
         locations.add(new LocationItem(R.drawable.ic_house, "Location", "Time(Start time - End time)"));
-        lData();
+        //lData();
         buildRecyclerView();
     }
 
